@@ -15,7 +15,18 @@ FILE_NAME = "meteo_data.csv"
 
 def scrape_onoca():
     results = []
-
+    
+    # Load existing data to check for duplicates
+        existing_records = set()
+        if os.path.exists(FILE_NAME):
+            with open(FILE_NAME, "r", encoding="utf-8") as f:
+                reader = csv.reader(f)
+                next(reader, None) # skip header
+                for row in reader:
+                    if len(row) >= 2:
+                        # Create a unique key of (StationName, Timestamp)
+                        existing_records.add((row[0], row[1]))
+                    
     for url in URLS:
         try:
             print(f"Scraping {url}...")
@@ -38,8 +49,12 @@ def scrape_onoca():
             temp_value = temp_match.group(1) if temp_match else "N/A"
 
             if site_time != "N/A" and temp_value != "N/A":
-                results.append([station_name, site_time, temp_value])
-                print(f"  Captured: {station_name} | {temp_value}°C")
+                    # Only add if it's not already in the CSV
+                if (station_name, site_time) not in existing_records:
+                    results.append([station_name, site_time, temp_value])
+                    print(f"  Captured: {station_name} | {temp_value}°C")
+                else:
+                    print(f"  Skipped: {station_name} (Data already exists for {site_time})")
             else:
                 print(f"  Warning: Missing data for {url}")
 
