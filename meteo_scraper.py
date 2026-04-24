@@ -4,6 +4,7 @@ import os
 import re
 import csv
 
+
 URLS = [
     "https://w1.onoca.de/",
     "https://w3.onoca.de/",
